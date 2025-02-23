@@ -36,13 +36,13 @@ For the detail configure:
     | -----------  | --------------- | ------------------ |
     | `t2.micro`   |129.43                 |10621.66      |
     | `t2.medium`  |52.654                 |19127.54      |
-    | `c5d.large`  |46.057                 |14969.13              |
+    | `c5d.large`  |46.057                 |14969.13      |
 
     > Region: US East (N. Virginia). Use `Ubuntu Server 22.04 LTS (HVM)` as AMI.
 
-For CPU performance, `t2.micro` is 1 vCPUs and `t2.medium` is 2 vCPUs. The result shows that the CPU performance of `t2.medium` is better than `t2.micro`. `t2.medium` has a better CPU performance may because of the more vCPUs. However, `c5d.large` is also 2 vCPUs, but the CPU performance is better than `t2.medium`. This may because of the different CPU type. `t2.medium` is general purpose, but `c5d.large` is compute optimized. The CPU performance of `c5d.large` is better than `t2.medium`.
+For CPU performance, the `t2.micro` instance offers 1 vCPU, while the `t2.medium` provides 2 vCPUs. The results indicate that the `t2.medium` has better CPU performance than the `t2.micro`, likely due to the higher number of vCPUs. However, despite also having 2 vCPUs, the `c5d.large` instance outperforms the `t2.medium` in CPU performance. This discrepancy is likely due to differing CPU architectures, as `t2.medium` is a general-purpose instance, whereas `c5d.large` is compute-optimized.
 
-For memory performance, `t2.micro` is 1 GiB, `t2.medium` is 4 GiB, and `c5d.large` is 4 GiB. However, we test not the memory size, but the memory speed. So the memory performance result may not direct related to the memory size.
+For memory performance, the `t2.micro` instance comes with 1 GiB of memory, whereas both the `t2.medium` and `c5d.large` have 4 GiB of memory each. It's important to note that the benchmark tests focus on memory speed rather than size, meaning the results may not be directly correlated with the amount of memory available in each instance.
 
 ## Question 2: Measure the EC2 Network performance
 
@@ -50,21 +50,28 @@ For memory performance, `t2.micro` is 1 GiB, `t2.medium` is 4 GiB, and `c5d.larg
 
     | Type                      | TCP b/w (Mbps) | RTT (ms) |
     | ------------------------- | -------------- | -------- |
-    | `t3.medium` - `t3.medium` |                |          |
-    | `m5.large` - `m5.large`   |                |          |
-    | `c5n.large` - `c5n.large` |                |          |
-    | `t3.medium` - `c5n.large` |                |          |
-    | `m5.large` - `c5n.large`  |                |          |
-    | `m5.large` - `t3.medium`  |                |          |
+    | `t3.medium` - `t3.medium` |3891            |0.250     |
+    | `m5.large` - `m5.large`   |4962            |0.194     |
+    | `c5n.large` - `c5n.large` |5911            |0.158     |
+    | `t3.medium` - `c5n.large` |2516            |0.795     |
+    | `m5.large` - `c5n.large`  |2724            |0.663     |
+    | `m5.large` - `t3.medium`  |4174            |0.258     |
 
     > Region: US East (N. Virginia). Use `Ubuntu Server 22.04 LTS (HVM)` as AMI. Note: Use private IP address when using iPerf within the same region. You'll need iPerf for measuring TCP bandwidth and Ping for measuring Round-Trip time.
+
+
+**Same-Type Instances**: Achieve higher TCP bandwidth and lower RTT due to optimized network paths and consistent hardware capabilities (e.g., c5n.large leverages enhanced networking for ~5.9 Gbps).
+**Cross-Type Instances**: Performance is limited by the instance with lower network bandwidth. I also found cross-type instances have lower TCP bandwidth and higher RTT compared to same-type instances. This may be due to the difference types of instances having more complex network paths and varying hardware capabilities.
 
 2. (1 mark) What about the network performance for instances deployed in different regions? In order to answer this question, you need to complete the following table.
 
     | Connection                | TCP b/w (Mbps) | RTT (ms) |
     | ------------------------- | -------------- | -------- |
-    | N. Virginia - Oregon      |                |          |
-    | N. Virginia - N. Virginia |                |          |
-    | Oregon - Oregon           |                |          |
+    | N. Virginia - Oregon      |32              |62.355    |
+    | N. Virginia - N. Virginia |4237            |0.236     |
+    | Oregon - Oregon           |4677            |0.198     |
 
     > Region: US East (N. Virginia), US West (Oregon). Use `Ubuntu Server 22.04 LTS (HVM)` as AMI. All instances are `c5.large`. Note: Use public IP address when using iPerf within the same region.
+
+**Cross-Region**: Low TCP bandwidth (~32 Mbps) and high RTT (~62 ms) due to traffic routing over the public internet.
+**Intra-Region**: High TCP bandwidth (~4.2–4.6 Gbps) and ultra-low RTT (~0.2 ms) via AWS’s internal backbone, even with public IPs.
